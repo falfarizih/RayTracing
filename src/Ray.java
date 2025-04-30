@@ -7,7 +7,7 @@ public class Ray {
         this.direction = direction.normalize();
     }
 
-    public Vector3 getPoint(double t) {
-        return origin.add(direction.multiply(t));
+    public Vector3 getPoint(double s) {
+        return origin.add(direction.multiply(s)); // p(s)= p + s*v
     }
 }

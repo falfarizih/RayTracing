@@ -23,12 +23,12 @@ public class Vector3 {
         return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar);
     }
 
-    // dot product (Skalarprodukt)
+    // dot product
     public double dot(Vector3 v) {
         return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 
-    // cross product (Kreuzprodukt) — only needed for Camera setup
+    // cross product
     public Vector3 cross(Vector3 v) {
         return new Vector3(
                 this.y * v.z - this.z * v.y,
@@ -47,11 +47,5 @@ public class Vector3 {
     //get length
     public double length() {
         return Math.sqrt(this.dot(this));
-    }
-
-    // For debugging: Print vector
-    @Override
-    public String toString() {
-        return "(" + x + ", " + y + ", " + z + ")";
     }
 }

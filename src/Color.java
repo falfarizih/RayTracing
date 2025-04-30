@@ -1,16 +1,16 @@
-public class ColorRGB {
+public class Color {
     public double r, g, b;
 
-    public ColorRGB(double r, double g, double b) {
+    public Color(double r, double g, double b) {
         this.r = r; this.g = g; this.b = b;
     }
 
-    public ColorRGB multiply(double scalar) {
-        return new ColorRGB(r * scalar, g * scalar, b * scalar);
+    public Color multiply(double scalar) {
+        return new Color(r * scalar, g * scalar, b * scalar);
     }
 
-    public ColorRGB multiply(ColorRGB other) {
-        return new ColorRGB(r * other.r, g * other.g, b * other.b);
+    public Color multiply(Color other) {
+        return new Color(r * other.r, g * other.g, b * other.b);
     }
 
     public int toRGB() {

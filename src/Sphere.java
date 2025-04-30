@@ -1,20 +1,23 @@
 public class Sphere {
     public Vector3 center;
     public double radius;
-    public Material material;
+    public Color color;
 
-    public Sphere(Vector3 center, double radius, Material material) {
+    public Sphere(Vector3 center, double radius, Color color) {
         this.center = center;
         this.radius = radius;
-        this.material = material;
+        this.color = color;
     }
 
     // Returns distance t if hit, otherwise -1
     public double intersect(Ray ray) {
-        Vector3 L = ray.origin.subtract(center);
-        double a = 1.0;  // since ray.direction is normalized
-        double b = 2.0 * ray.direction.dot(L);
-        double c = L.dot(L) - radius * radius;
+        // |(p+s*v)-c|^2 = r^2
+        //  s^2(v.v)  + 2*(v.(p-c)) + (p-c).(p-c)-r^2  = 0
+        Vector3 L = ray.origin.subtract(center);  // (p-c) center to origin
+
+        double a = 1.0;                             // (v.v)since ray.direction is normalized
+        double b = 2.0 * ray.direction.dot(L);      // 2*(v.(p-c))
+        double c = L.dot(L) - radius * radius;      // (p-c).(p-c)-r^2
 
         double discriminant = b * b - 4 * a * c;
         if (discriminant < 0) return -1;
