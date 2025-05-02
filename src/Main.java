@@ -38,7 +38,7 @@ public class Main {
         List<Sphere> spheres = new ArrayList<>();
         spheres.add(new Sphere(new Vector3(1, 0, -2), 1.0, new Color(1, 0, 0)));
         spheres.add(new Sphere(new Vector3(0, -1, -3), 2.0, new Color(0, 1, 1)));
-        spheres.add(new Sphere(new Vector3(-1, 0, -1), 0.5, new Color(1, 1, 0)));
+        spheres.add(new Sphere(new Vector3(0, 0, -1), 0.5, new Color(1, 1, 0)));
 
         // create light (position, color object)
         Light light = new Light(new Vector3(3, 3, 0), 2.0, new Color(1.0, 1.0, 1.0));
@@ -78,7 +78,7 @@ public class Main {
 
         if (found_closer_hit) {
             Vector3 hit_point = ray.getPoint(closest_distance); // extract the hit point by using hit_point = p+s*v
-            Vector3 normal = hit_point.subtract(hit_sphere.center).normalize(); // (s-c)/r
+            Vector3 normal = hit_point.subtract(hit_sphere.center).normalize(); // (s-c)/r normal in der objekt class machen
 
             Vector3 light_direction = light.position.subtract(hit_point).normalize(); // From hit point to light: l = (L - p)
             double diffuse_factor = Math.max(0, normal.dot(light_direction)); //n·(-r) = |n| |r| cos(θ) (a.b = cos(θ)) (we dont negative it because the vector r points from point to light)
