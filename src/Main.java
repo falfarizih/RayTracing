@@ -78,7 +78,7 @@ public class Main {
 
         if (found_closer_hit) {
             Vector3 hit_point = ray.getPoint(closest_distance); // extract the hit point by using hit_point = p+s*v
-            Vector3 normal = hit_point.subtract(hit_sphere.center).normalize(); // (s-c)/r normal in der objekt class machen
+            Vector3 normal =  hit_sphere.getNormal(hit_point);// (s-c)/r normal in der objekt class machen
 
             Vector3 light_direction = light.position.subtract(hit_point).normalize(); // From hit point to light: l = (L - p)
             double diffuse_factor = Math.max(0, normal.dot(light_direction)); //n·(-r) = |n| |r| cos(θ) (a.b = cos(θ)) (we dont negative it because the vector r points from point to light)

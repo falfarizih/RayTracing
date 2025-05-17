@@ -9,6 +9,11 @@ public class Sphere {
         this.color = color;
     }
 
+    // Calculate the normal vector at a given point on the sphere
+    public Vector3 getNormal(Vector3 point) {
+        return point.subtract(center).normalize();
+    }
+
     // Returns distance t if hit, otherwise -1
     public double intersect(Ray ray) {
         // |(p+s*v)-c|^2 = r^2
