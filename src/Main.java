@@ -38,23 +38,29 @@ public class Main {
 
         // CREATING OBJECTS IN THE SCENE
 
-        // Sphere centered at (0, 0, -5)
+
+        //Material Setup
+        Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0);  // Smooth metal surface
+        Material mattePlastic = new Material(new Color(0.7, 0.1, 0.1), 0.9, 0.0); // Rough plastic material
+
+
+        //Sphere centered at (0, 0, -5)
         Matrix4 sphereQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
-                0, 0, 0, -1
+               0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, new Color(1, 0, 0)); // Red Sphere
+        Quadric sphere = new Quadric(sphereQ, shinyMetal); // Red Sphere
 
         // Cylinder along Y-axis centered at (0, 0, -5)
         Matrix4 cylinderQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 1, 0,
-                0, 0, 0, -1
+               0, 0, 0, -1
         );
-        Quadric cylinder = new Quadric(cylinderQ, new Color(0, 1, 0)); // Green Cylinder
+        Quadric cylinder = new Quadric(cylinderQ, shinyMetal); // Green Cylinder
 
         // Move both objects back along Z-axis
         Matrix4 translateSphere = Matrix4.translation(0, 0, -3);
@@ -83,7 +89,9 @@ public class Main {
         List<CSGDifference> differences = new ArrayList<>();
 
         // Choose which CSG to render:
-        unions.add(unionObj);          // To show Union result
+        quadrics.add(sphere);
+        quadrics.add(cylinder);
+        //unions.add(unionObj);          // To show Union result
         //intersections.add(intersectObj); // Uncomment to show Intersection result
         //differences.add(diffObj);        // Uncomment to show Difference result
 
@@ -166,11 +174,11 @@ public class Main {
             Vector3 light_direction = light.position.subtract(hit_point).normalize();
             double diffuse_factor = Math.max(0, normal.dot(light_direction));
 
-            Color diffuse = hit_quadric.color
-                    .multiply(light.color)
-                    .multiply(diffuse_factor * light.intensity);
-
-            return diffuse;
+            Vector3 viewDir = ray.origin.subtract(hit_point).normalize();
+            return Lighting.cookTorrance(
+                    normal, viewDir, light_direction,
+                    light.color, light.intensity,
+                    hit_quadric.material);
         }
 
         // Step 6: No hit found, return background color

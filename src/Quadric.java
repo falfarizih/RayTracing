@@ -1,10 +1,10 @@
 public class Quadric {
     public Matrix4 Q;         // Quadric Matrix
-    public Color color;    // Surface Color
+    public Material material;
 
-    public Quadric(Matrix4 Q, Color color) {
+    public Quadric(Matrix4 Q, Material material) {
         this.Q = Q;
-        this.color = color;
+        this.material = material;
     }
 
     // Apply Transformation: Q' = (M⁻¹)ᵗ * Q * M⁻¹
