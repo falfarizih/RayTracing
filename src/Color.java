@@ -40,6 +40,15 @@ public class Color {
         return new Color(1.0, 1.0, 1.0);
     }
 
+    public Color applyGamma(double gamma) {
+        double inverted_gamma = 1.0 / gamma;
+        return new Color(
+                Math.pow(this.r, inverted_gamma),
+                Math.pow(this.g, inverted_gamma),
+                Math.pow(this.b, inverted_gamma)
+        );
+    }
+
 
     public int toRGB() {
         int ir = (int)(Math.min(1.0, r) * 255);

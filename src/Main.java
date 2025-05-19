@@ -60,7 +60,7 @@ public class Main {
                 0, 0, 1, 0,
                0, 0, 0, -1
         );
-        Quadric cylinder = new Quadric(cylinderQ, shinyMetal); // Green Cylinder
+        Quadric cylinder = new Quadric(cylinderQ, mattePlastic); // Green Cylinder
 
         // Move both objects back along Z-axis
         Matrix4 translateSphere = Matrix4.translation(0, 0, -3);
@@ -101,12 +101,14 @@ public class Main {
         // CREATE LIGHT (position, color object)
         Light light = new Light(new Vector3(3, 3, 0), 2.0, new Color(1.0, 1.0, 1.0));
 
+
         // RENDER
         for (int y = 0; y < resY; y++) {
             for (int x = 0; x < resX; x++) {
                 Ray ray = camera.generateRay(x, y, resX, resY);
                 Color color = traceRay(ray, quadrics, unions, intersections, differences, light);
-                pixels[y * resX + x] = color.toRGB();
+                Color corrected = color.applyGamma(1);  // Apply gamma correction before converting to RGB
+                pixels[y * resX + x] = corrected.toRGB();
             }
         }
 
