@@ -107,7 +107,7 @@ public class Main {
             for (int x = 0; x < resX; x++) {
                 Ray ray = camera.generateRay(x, y, resX, resY);
                 Color color = traceRay(ray, quadrics, unions, intersections, differences, light);
-                Color corrected = color.applyGamma(1);  // Apply gamma correction before converting to RGB
+                Color corrected = color.applyGamma(2.2);  // Apply gamma correction before converting to RGB
                 pixels[y * resX + x] = corrected.toRGB();
             }
         }
