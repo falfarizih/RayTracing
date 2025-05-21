@@ -1,6 +1,5 @@
 public class CSGDifference {
-    public Quadric A;
-    public Quadric B;
+    public Quadric A, B;
 
     public CSGDifference(Quadric A, Quadric B) {
         this.A = A;
@@ -8,32 +7,26 @@ public class CSGDifference {
     }
 
     public IntersectionResult intersect(Ray ray) {
-        double tAin = A.intersect(ray);
-        double tAout = computeExit(A, ray, tAin);
+        HitInterval a = A.intersectInterval(ray);
+        if (a == null) return null;
 
-        double tBin = B.intersect(ray);
-        double tBout = computeExit(B, ray, tBin);
+        HitInterval b = B.intersectInterval(ray);
 
-        if (tAin < 0) return null; // No hit with A at all
-
-        if (tBin < 0 || tBin > tAout) {
-            // B is not overlapping or behind A, simple case
-            return new IntersectionResult(tAin, A);
-        } else if (tBout > tAout) {
-            // B starts before A but doesn't fully cover it
-            return new IntersectionResult(tBout, A);
+        if (b == null || b.tEnter > a.tExit || b.tExit < a.tEnter) {
+            // B doesn't affect A
+            return (a.tEnter > 0) ? new IntersectionResult(a.tEnter, A) : null;
         }
 
-        return null; // B completely cuts out the intersection
-    }
+        if (b.tEnter > a.tEnter && b.tEnter < a.tExit) {
+            // B enters after A
+            return (a.tEnter > 0) ? new IntersectionResult(a.tEnter, A) : null;
+        }
 
-    private double computeExit(Quadric obj, Ray ray, double tEntry) {
-        if (tEntry < 0) return -1;
-        Vector3 entryPoint = ray.getPoint(tEntry);
-        Vector3 normal = obj.getNormal(entryPoint);
-        Vector3 reverseDir = ray.direction.multiply(-1);
+        if (b.tExit > a.tEnter && b.tExit < a.tExit) {
+            // B exits before A ends
+            return (b.tExit > 0) ? new IntersectionResult(b.tExit, A) : null;
+        }
 
-        Ray reverseRay = new Ray(entryPoint.add(normal.multiply(1e-6)), reverseDir);
-        return obj.intersect(reverseRay);
+        return null; // Fully subtracted
     }
 }

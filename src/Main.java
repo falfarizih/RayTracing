@@ -41,7 +41,7 @@ public class Main {
 
         //Material Setup
         Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0);  // Smooth metal surface
-        Material mattePlastic = new Material(new Color(0.7, 0.1, 0.1), 0.9, 0.0); // Rough plastic material
+        Material mattePlastic = new Material(new Color(1, 0.1, 0.0), 0.9, 0.0); // Rough plastic material
 
 
         //Sphere centered at (0, 0, -5)
@@ -62,18 +62,27 @@ public class Main {
         );
         Quadric cylinder = new Quadric(cylinderQ, mattePlastic); // Green Cylinder
 
-        // Move both objects back along Z-axis
+        // Set individual transformation
         Matrix4 translateSphere = Matrix4.translation(0, 0, -3);
-        Matrix4 translateCylinder = Matrix4.translation(1.5, 0, -3);
+        Matrix4 translateCylinder = Matrix4.translation(0.5, 0, -3);
+        Matrix4 rotateCylinder = Matrix4.rotationZ(Math.toRadians(45));
+        Matrix4 scaleSphere = Matrix4.scaling(1, 1, 1); // 1.5× in all directions
 
-        sphere.applyTransformation(translateSphere);
-        cylinder.applyTransformation(translateCylinder);
+
+        // Group up transformation
+        Matrix4 transformCylinder = translateCylinder.multiply(rotateCylinder);
+        Matrix4 transformSphere = translateSphere.multiply(scaleSphere);
+
+
+        // Apply transformation to the objects
+        sphere.applyTransformation(transformSphere);
+        cylinder.applyTransformation(transformCylinder);
 
         // Union: Sphere ∪ Cylinder
         CSGUnion unionObj = new CSGUnion(sphere, cylinder);
 
         // Intersection: Sphere ∩ Cylinder
-        CSGIntersection intersectObj = new CSGIntersection(sphere, cylinder);
+        CSGIntersection intersectObj = new CSGIntersection(cylinder, sphere);
 
         // Difference: Sphere − Cylinder
         CSGDifference diffObj = new CSGDifference(sphere, cylinder);
@@ -89,11 +98,11 @@ public class Main {
         List<CSGDifference> differences = new ArrayList<>();
 
         // Choose which CSG to render:
-        quadrics.add(sphere);
-        quadrics.add(cylinder);
+        //quadrics.add(sphere);
+        //quadrics.add(cylinder);
         //unions.add(unionObj);          // To show Union result
         //intersections.add(intersectObj); // Uncomment to show Intersection result
-        //differences.add(diffObj);        // Uncomment to show Difference result
+        differences.add(diffObj);        // Uncomment to show Difference result
 
 
 
