@@ -183,13 +183,9 @@ public class Main {
             Vector3 normal = hit_quadric.getNormal(hit_point);
 
             Vector3 light_direction = light.position.subtract(hit_point).normalize();
-            double diffuse_factor = Math.max(0, normal.dot(light_direction));
 
             Vector3 viewDir = ray.origin.subtract(hit_point).normalize();
-            return Lighting.cookTorrance(
-                    normal, viewDir, light_direction,
-                    light.color, light.intensity,
-                    hit_quadric.material);
+            return Lighting.cookTorrance(normal, viewDir, light_direction, light.color, light.intensity, hit_quadric.material);
         }
 
         // Step 6: No hit found, return background color

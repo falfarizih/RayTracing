@@ -8,8 +8,8 @@ public class CSGIntersection {
     }
 
     public IntersectionResult intersect(Ray ray) {
-        double tAin = A.intersect(ray);
-        double tBout = B.intersect(ray);
+        double tAin = A.intersect(ray); // First intersection with A (entry point)
+        double tBout = B.intersect(ray); // First intersection with B (entry point)
 
         if (tAin < 0 || tBout < 0) return null; // Must intersect both
 

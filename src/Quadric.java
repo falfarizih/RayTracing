@@ -15,13 +15,15 @@ public class Quadric {
     }
 
     public double intersect(Ray ray) {
-        Vector4 p = new Vector4(ray.origin, 1);   // Homogeneous coordinates [x, y, z, 1]
-        Vector4 v = new Vector4(ray.direction, 0); // Direction vector, w = 0
+        Vector4 p = new Vector4(ray.origin, 1);   // because its a point, w=1
+        Vector4 v = new Vector4(ray.direction, 0); // because its a direction, w=0
 
-        // Compute quadratic coefficients: A, B, C
-        double A = v.dot(Q.multiply(v));
-        double B = 2 * p.dot(Q.multiply(v));
-        double C = p.dot(Q.multiply(p));
+        // (p + t·v)ᵀ · Q · (p + t·v) = 0
+        // At² + Bt + C = 0
+        // Quadratic coefficients: A, B, C
+        double A = v.dot(Q.multiply(v));        // vᵀQv
+        double B = 2 * p.dot(Q.multiply(v));    // 2pᵀQv
+        double C = p.dot(Q.multiply(p));        // p^t . Q . p
 
         double discriminant = B * B - 4 * A * C;
 
@@ -83,9 +85,9 @@ public class Quadric {
         double i = Q.m[2][3];
 
         Vector3 normal = new Vector3(
-                a * x + d * y + e * z + g,
-                b * y + d * x + f * z + h,
-                c * z + e * x + f * y + i
+                a * x + d * y + e * z + g,     // ∂F/∂x = ax + dy + ez + g
+                b * y + d * x + f * z + h,      // ∂F/∂y = by + dx + fz + h
+                c * z + e * x + f * y + i       // ∂F/∂z = cz + ex + fy + i
         );
 
         return normal.normalize();
