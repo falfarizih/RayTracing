@@ -15,6 +15,7 @@ public class Lighting {
 
         // F (Schlick)
         // F0 = Mix between dielectric constant (0.04) and material.albedo based on metalness
+        //F0= (1 –metalness) * 0,04 + metalness* albedo
         Color F0 = new Color(0.04, 0.04, 0.04).multiply(1 - material.metalness)
                 .add(material.albedo.multiply(material.metalness));
         // F = F0 + (1 - F0) * (1 - N·V)^5

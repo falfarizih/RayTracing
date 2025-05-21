@@ -24,7 +24,7 @@ public class CSGIntersection {
         double entry = Math.max(A_in, B_in); //compare entry point of both object, take the furthest one, because we need the second hit
 
 
-        // Determine which object we are entering second — that's the surface we see
+        // determine which object we are entering second
         Quadric hit_object;
         if (A_in > B_in) { //takes the object of the second entry
             hit_object = A;
@@ -32,7 +32,7 @@ public class CSGIntersection {
             hit_object = B;
         }
 
-            // Return the first hit point and the object that was hit (the second object)
+            // return the first hit point and the object that was hit (the second object)
         return new FinalRayHit(entry, hit_object);
     }
 }

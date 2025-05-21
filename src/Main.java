@@ -53,20 +53,20 @@ public class Main {
         );
         Quadric sphere = new Quadric(sphereQ, shinyMetal); // Red Sphere
 
-        // Cylinder along Y-axis centered at (0, 0, -5)
+        // Cylinder along Y-axis
         Matrix4 cylinderQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 1, 0,
                0, 0, 0, -1
         );
-        Quadric cylinder = new Quadric(cylinderQ, mattePlastic); // Green Cylinder
+        Quadric cylinder = new Quadric(cylinderQ, mattePlastic);
 
         // Set individual transformation
         Matrix4 translateSphere = Matrix4.translation(0, 0, -3);
         Matrix4 translateCylinder = Matrix4.translation(0.5, 0, -3);
         Matrix4 rotateCylinder = Matrix4.rotationZ(Math.toRadians(45));
-        Matrix4 scaleSphere = Matrix4.scaling(1, 1, 1); // 1.5× in all directions
+        Matrix4 scaleSphere = Matrix4.scaling(1, 1, 1);
 
 
         // Group up transformation
@@ -97,12 +97,12 @@ public class Main {
         List<CSGIntersection> intersections = new ArrayList<>();
         List<CSGDifference> differences = new ArrayList<>();
 
-        // Choose which CSG to render:
+        // Choose CSG to render:
         //quadrics.add(sphere);
         //quadrics.add(cylinder);
-        //unions.add(unionObj);          // To show Union result
-        //intersections.add(intersectObj); // Uncomment to show Intersection result
-        //differences.add(diffObj);        // Uncomment to show Difference result
+        //unions.add(unionObj);
+        //intersections.add(intersectObj);
+        //differences.add(diffObj);
 
 
 
@@ -177,7 +177,7 @@ public class Main {
             }
         }
 
-        // Step 5: Compute lighting if any object was hit
+        // Step 5: Calculate lighting if any object was hit
         if (found_closer_hit) {
             Vector3 hit_point = ray.getPoint(closest_distance);
             Vector3 normal = hit_quadric.getNormal(hit_point);

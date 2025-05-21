@@ -45,9 +45,9 @@ public class Quadric {
         Vector4 p = new Vector4(ray.origin, 1);     // Ray origin in homogeneous coordinates
         Vector4 v = new Vector4(ray.direction, 0);  // Ray direction, w = 0
 
-        double A = v.dot(Q.multiply(v));
-        double B = 2 * p.dot(Q.multiply(v));
-        double C = p.dot(Q.multiply(p));
+        double A = v.dot(Q.multiply(v));        // vᵀQv
+        double B = 2 * p.dot(Q.multiply(v));    // 2pᵀQv
+        double C = p.dot(Q.multiply(p));        // p^t . Q . p
 
         double discriminant = B * B - 4 * A * C;
         if (discriminant < 0) return null;
@@ -67,7 +67,7 @@ public class Quadric {
         return new IndividualHitPoints(t1, t2);
     }
 
-
+//partial ableitung
     public Vector3 getNormal(Vector3 point) {
         double x = point.x;
         double y = point.y;
