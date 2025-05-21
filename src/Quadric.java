@@ -14,7 +14,7 @@ public class Quadric {
         this.Q = M_inv_T.multiply(this.Q).multiply(M_inv);
     }
 
-    public double intersect(Ray ray) {
+    public double intersectFirstHit(Ray ray) {
         Vector4 p = new Vector4(ray.origin, 1);   // because its a point, w=1
         Vector4 v = new Vector4(ray.direction, 0); // because its a direction, w=0
 
@@ -40,8 +40,8 @@ public class Quadric {
         return -1; // Both intersections behind the ray origin
     }
 
-    // NEW: Returns both entry and exit intersection distances
-    public HitInterval intersectInterval(Ray ray) {
+    // returns hit points both entry and exit
+    public IndividualHitPoints intersectIndividual(Ray ray) {
         Vector4 p = new Vector4(ray.origin, 1);     // Ray origin in homogeneous coordinates
         Vector4 v = new Vector4(ray.direction, 0);  // Ray direction, w = 0
 
@@ -64,7 +64,7 @@ public class Quadric {
 
         if (t2 < 0) return null; // both hits behind camera
 
-        return new HitInterval(t1, t2);
+        return new IndividualHitPoints(t1, t2);
     }
 
 

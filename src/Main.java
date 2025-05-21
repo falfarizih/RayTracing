@@ -102,7 +102,7 @@ public class Main {
         //quadrics.add(cylinder);
         //unions.add(unionObj);          // To show Union result
         //intersections.add(intersectObj); // Uncomment to show Intersection result
-        differences.add(diffObj);        // Uncomment to show Difference result
+        //differences.add(diffObj);        // Uncomment to show Difference result
 
 
 
@@ -139,7 +139,7 @@ public class Main {
 
         // Step 1: Check regular Quadrics
         for (Quadric quadric : quadrics) {
-            double t = quadric.intersect(ray);
+            double t = quadric.intersectFirstHit(ray);
             if (t > 0 && (!found_closer_hit || t < closest_distance)) {
                 found_closer_hit = true;
                 closest_distance = t;
@@ -149,7 +149,7 @@ public class Main {
 
         // Step 2: Check CSG Unions
         for (CSGUnion union : unions) {
-            IntersectionResult result = union.intersect(ray);
+            FinalRayHit result = union.intersectUnion(ray);
             if (result != null && (!found_closer_hit || result.t < closest_distance)) {
                 found_closer_hit = true;
                 closest_distance = result.t;
@@ -159,7 +159,7 @@ public class Main {
 
         // Step 3: Check CSG Intersections
         for (CSGIntersection inter : intersections) {
-            IntersectionResult result = inter.intersect(ray);
+            FinalRayHit result = inter.intersectIntersection(ray);
             if (result != null && (!found_closer_hit || result.t < closest_distance)) {
                 found_closer_hit = true;
                 closest_distance = result.t;
@@ -169,7 +169,7 @@ public class Main {
 
         // Step 4: Check CSG Differences
         for (CSGDifference diff : differences) {
-            IntersectionResult result = diff.intersect(ray);
+            FinalRayHit result = diff.intersectDifference(ray);
             if (result != null && (!found_closer_hit || result.t < closest_distance)) {
                 found_closer_hit = true;
                 closest_distance = result.t;

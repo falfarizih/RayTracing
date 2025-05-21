@@ -7,20 +7,32 @@ public class CSGIntersection {
         this.B = B;
     }
 
-    public IntersectionResult intersect(Ray ray) {
-        double tAin = A.intersect(ray); // First intersection with A (entry point)
-        double tBout = B.intersect(ray); // First intersection with B (entry point)
+    public FinalRayHit intersectIntersection(Ray ray) {
+        // Get the interval (entry/exit points) for both objects
+        IndividualHitPoints intervalA = A.intersectIndividual(ray);
+        IndividualHitPoints intervalB = B.intersectIndividual(ray);
 
-        if (tAin < 0 || tBout < 0) return null; // Must intersect both
-
-        // Take the max of the entry points (second entry point into both objects)
-        double tEntry = Math.max(tAin, tBout);
-
-        if (tEntry > 0) {
-            Quadric hitObj = (tAin > tBout) ? A : B;
-            return new IntersectionResult(tEntry, hitObj);
+        // If the ray misses either object, there is no intersection
+        if (intervalA == null || intervalB == null) {
+            return null;
         }
 
-        return null; // No valid intersection where ray is inside both
+        double A_in = intervalA.t_enter;
+        double B_in = intervalB.t_enter;
+
+        // determine the entry point
+        double entry = Math.max(A_in, B_in); //compare entry point of both object, take the furthest one, because we need the second hit
+
+
+        // Determine which object we are entering second — that's the surface we see
+        Quadric hit_object;
+        if (A_in > B_in) { //takes the object of the second entry
+            hit_object = A;
+        } else {
+            hit_object = B;
+        }
+
+            // Return the first hit point and the object that was hit (the second object)
+        return new FinalRayHit(entry, hit_object);
     }
 }
