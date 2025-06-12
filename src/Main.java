@@ -13,7 +13,6 @@ public class Main {
         int resY = 800;
 
         int[] pixels = new int[resX * resY];
-
         MemoryImageSource mis = new MemoryImageSource(resX, resY,
                 new DirectColorModel(24, 0xff0000, 0xff00, 0xff),
                 pixels, 0, resX);
@@ -26,8 +25,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        // SETTING THE CAMERA (poition, view direction, image plane width, image plane height)
-
+        // CAMERA SETUP
         Camera camera = new Camera(
                 new Vector3(0, 0, 0),
                 new Vector3(0, 0, -1),
@@ -35,160 +33,76 @@ public class Main {
                 4
         );
 
+        // MATERIALS
+        Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0);
+        Material mattePlastic = new Material(new Color(1, 1, 0), 0.9, 0.0);  // Yellow plastic
 
-        // CREATING OBJECTS IN THE SCENE
-
-
-        //Material Setup
-        Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0);  // Smooth metal surface
-        Material mattePlastic = new Material(new Color(1, 0.1, 0.0), 0.9, 0.0); // Rough plastic material
-
-
-        //Sphere centered at (0, 0, -5)
+        // SPHERE: Centered and scaled
         Matrix4 sphereQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
-               0, 0, 0, -1
+                0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, shinyMetal); // Red Sphere
+        Quadric sphere = new Quadric(sphereQ, shinyMetal);
+        Matrix4 sphereTransform = Matrix4.translation(0, 0, -3).multiply(Matrix4.scaling(1.2, 1.2, 1.2));
+        sphere.applyTransformation(sphereTransform);
 
-        // Cylinder along Y-axis
+        // CYLINDER: Translated and rotated
         Matrix4 cylinderQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 1, 0,
-               0, 0, 0, -1
+                0, 0, 0, -1
         );
         Quadric cylinder = new Quadric(cylinderQ, mattePlastic);
+        Matrix4 cylinderTransform = Matrix4.translation(0.5, 0, -3).multiply(Matrix4.rotationZ(Math.toRadians(45)));
+        cylinder.applyTransformation(cylinderTransform);
 
-        // Set individual transformation
-        Matrix4 translateSphere = Matrix4.translation(0, 0, -3);
-        Matrix4 translateCylinder = Matrix4.translation(0.5, 0, -3);
-        Matrix4 rotateCylinder = Matrix4.rotationZ(Math.toRadians(45));
-        Matrix4 scaleSphere = Matrix4.scaling(1, 1, 1);
+        // SCENE OBJECTS LIST
+        List<SceneObject> scene = new ArrayList<>();
 
+        // Add CSG operation result to scene
+        // You can change between UNION, INTERSECTION, DIFFERENCE
+        scene.add(new CSG(cylinder, sphere, CSG.Operation.DIFFERENCE));
 
-        // Group up transformation
-        Matrix4 transformCylinder = translateCylinder.multiply(rotateCylinder);
-        Matrix4 transformSphere = translateSphere.multiply(scaleSphere);
-
-
-        // Apply transformation to the objects
-        sphere.applyTransformation(transformSphere);
-        cylinder.applyTransformation(transformCylinder);
-
-        // Union: Sphere ∪ Cylinder
-        CSGUnion unionObj = new CSGUnion(sphere, cylinder);
-
-        // Intersection: Sphere ∩ Cylinder
-        CSGIntersection intersectObj = new CSGIntersection(cylinder, sphere);
-
-        // Difference: Sphere − Cylinder
-        CSGDifference diffObj = new CSGDifference(sphere, cylinder);
-
-
-        // ADD TO SCENE
-        // Keep quadrics list for individual objects (optional)
-        List<Quadric> quadrics = new ArrayList<>();
-
-        // CSG Object Lists
-        List<CSGUnion> unions = new ArrayList<>();
-        List<CSGIntersection> intersections = new ArrayList<>();
-        List<CSGDifference> differences = new ArrayList<>();
-
-        // Choose CSG to render:
-        //quadrics.add(sphere);
-        //quadrics.add(cylinder);
-        //unions.add(unionObj);
-        //intersections.add(intersectObj);
-        //differences.add(diffObj);
-
-
-
-
-        // CREATE LIGHT (position, color object)
+        // LIGHT
         Light light = new Light(new Vector3(3, 3, 0), 2.0, new Color(1.0, 1.0, 1.0));
 
-
-        // RENDER
+        // RENDER LOOP
         for (int y = 0; y < resY; y++) {
             for (int x = 0; x < resX; x++) {
                 Ray ray = camera.generateRay(x, y, resX, resY);
-                Color color = traceRay(ray, quadrics, unions, intersections, differences, light);
-                Color corrected = color.applyGamma(2.2);  // Apply gamma correction before converting to RGB
+                Color color = traceRay(ray, scene, light);
+                Color corrected = color.applyGamma(2.2);
                 pixels[y * resX + x] = corrected.toRGB();
             }
         }
 
-        // DISPLAY THE IMAGE
-        mis.newPixels();
+        mis.newPixels(); // Refresh image
     }
 
-    //
-    public static Color traceRay(Ray ray,
-                                 List<Quadric> quadrics,
-                                 List<CSGUnion> unions,
-                                 List<CSGIntersection> intersections,
-                                 List<CSGDifference> differences,
-                                 Light light) {
+    public static Color traceRay(Ray ray, List<SceneObject> scene, Light light) {
+        double closest = Double.POSITIVE_INFINITY;
+        Quadric hitObject = null;
 
-        double closest_distance = -1;
-        Quadric hit_quadric = null;
-        boolean found_closer_hit = false;
-
-        // Step 1: Check regular Quadrics
-        for (Quadric quadric : quadrics) {
-            double t = quadric.intersectFirstHit(ray);
-            if (t > 0 && (!found_closer_hit || t < closest_distance)) {
-                found_closer_hit = true;
-                closest_distance = t;
-                hit_quadric = quadric;
+        for (SceneObject obj : scene) {
+            FinalRayHit result = obj.intersect(ray);
+            if (result != null && result.t > 0 && result.t < closest) {
+                closest = result.t;
+                hitObject = result.hitObject;
             }
         }
 
-        // Step 2: Check CSG Unions
-        for (CSGUnion union : unions) {
-            FinalRayHit result = union.intersectUnion(ray);
-            if (result != null && (!found_closer_hit || result.t < closest_distance)) {
-                found_closer_hit = true;
-                closest_distance = result.t;
-                hit_quadric = result.hitObject;
-            }
+        if (hitObject != null) {
+            Vector3 hitPoint = ray.getPoint(closest);
+            Vector3 normal = hitObject.getNormal(hitPoint);
+            Vector3 lightDir = light.position.subtract(hitPoint).normalize();
+            Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
+
+            return Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
         }
 
-        // Step 3: Check CSG Intersections
-        for (CSGIntersection inter : intersections) {
-            FinalRayHit result = inter.intersectIntersection(ray);
-            if (result != null && (!found_closer_hit || result.t < closest_distance)) {
-                found_closer_hit = true;
-                closest_distance = result.t;
-                hit_quadric = result.hitObject;
-            }
-        }
-
-        // Step 4: Check CSG Differences
-        for (CSGDifference diff : differences) {
-            FinalRayHit result = diff.intersectDifference(ray);
-            if (result != null && (!found_closer_hit || result.t < closest_distance)) {
-                found_closer_hit = true;
-                closest_distance = result.t;
-                hit_quadric = result.hitObject;
-            }
-        }
-
-        // Step 5: Calculate lighting if any object was hit
-        if (found_closer_hit) {
-            Vector3 hit_point = ray.getPoint(closest_distance);
-            Vector3 normal = hit_quadric.getNormal(hit_point);
-
-            Vector3 light_direction = light.position.subtract(hit_point).normalize();
-
-            Vector3 viewDir = ray.origin.subtract(hit_point).normalize();
-            return Lighting.cookTorrance(normal, viewDir, light_direction, light.color, light.intensity, hit_quadric.material);
-        }
-
-        // Step 6: No hit found, return background color
-        return new Color(0.1, 0.1, 0.1);
+        return new Color(0.1, 0.1, 0.1); // background
     }
 }

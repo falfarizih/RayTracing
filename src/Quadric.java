@@ -1,4 +1,4 @@
-public class Quadric {
+public class Quadric implements SceneObject{
     public Matrix4 Q;         // Quadric Matrix
     public Material material;
 
@@ -12,6 +12,12 @@ public class Quadric {
         Matrix4 M_inv = M.inverse();
         Matrix4 M_inv_T = M_inv.transpose();
         this.Q = M_inv_T.multiply(this.Q).multiply(M_inv);
+    }
+
+    public FinalRayHit intersect(Ray ray) {
+        IndividualHitPoints interval = this.intersectIndividual(ray);
+        if (interval == null) return null;
+        return new FinalRayHit(interval.t_enter, this);
     }
 
     public double intersectFirstHit(Ray ray) {
