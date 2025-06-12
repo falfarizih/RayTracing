@@ -62,8 +62,7 @@ public class Main {
         // SCENE OBJECTS LIST
         List<SceneObject> scene = new ArrayList<>();
 
-        // Add CSG operation result to scene
-        // You can change between UNION, INTERSECTION, DIFFERENCE
+        // ADD TO SCENE
         scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
 
         // LIGHT
@@ -79,13 +78,15 @@ public class Main {
             }
         }
 
-        mis.newPixels(); // Refresh image
+        // DISPLAY IMAGE
+        mis.newPixels();
     }
 
     public static Color traceRay(Ray ray, List<SceneObject> scene, Light light) {
         double closest = Double.POSITIVE_INFINITY;
         Quadric hitObject = null;
 
+        // check all object in the scene
         for (SceneObject obj : scene) {
             FinalRayHit result = obj.intersect(ray);
             if (result != null && result.t > 0 && result.t < closest) {
@@ -94,6 +95,7 @@ public class Main {
             }
         }
 
+        // calculate lighting if any object was hit
         if (hitObject != null) {
             Vector3 hitPoint = ray.getPoint(closest);
             Vector3 normal = hitObject.getNormal(hitPoint);
@@ -103,6 +105,7 @@ public class Main {
             return Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
         }
 
+        //
         return new Color(0.1, 0.1, 0.1); // background
     }
 }
