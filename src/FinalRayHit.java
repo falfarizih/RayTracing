@@ -3,9 +3,11 @@ public class FinalRayHit {
 
     public double t;
     public Quadric hitObject;
+    public boolean flipNormal;
 
     public FinalRayHit(double t, Quadric hitObject) {
         this.t = t;
         this.hitObject = hitObject;
     }
+
 }

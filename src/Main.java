@@ -64,7 +64,7 @@ public class Main {
 
         // Add CSG operation result to scene
         // You can change between UNION, INTERSECTION, DIFFERENCE
-        scene.add(new CSG(cylinder, sphere, CSG.Operation.DIFFERENCE));
+        scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
 
         // LIGHT
         Light light = new Light(new Vector3(3, 3, 0), 2.0, new Color(1.0, 1.0, 1.0));
