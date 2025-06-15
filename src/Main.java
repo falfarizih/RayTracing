@@ -45,7 +45,7 @@ public class Main {
                 0, 0, 0, -1
         );
         Quadric sphere = new Quadric(sphereQ, shinyMetal);
-        Matrix4 sphereTransform = Matrix4.translation(0, 0, -3).multiply(Matrix4.scaling(1.2, 1.2, 1.2));
+        Matrix4 sphereTransform = Matrix4.translation(0.6, 0, -3.5).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
         sphere.applyTransformation(sphereTransform);
 
         // CYLINDER: Translated and rotated
@@ -56,7 +56,7 @@ public class Main {
                 0, 0, 0, -1
         );
         Quadric cylinder = new Quadric(cylinderQ, mattePlastic);
-        Matrix4 cylinderTransform = Matrix4.translation(0.5, 0, -3).multiply(Matrix4.rotationZ(Math.toRadians(45)));
+        Matrix4 cylinderTransform = Matrix4.translation(0, 0, -4).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
         cylinder.applyTransformation(cylinderTransform);
 
         // SCENE OBJECTS LIST
@@ -66,7 +66,7 @@ public class Main {
         scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
 
         // LIGHT
-        Light light = new Light(new Vector3(3, 3, 0), 2.0, new Color(1.0, 1.0, 1.0));
+        Light light = new Light(new Vector3(2, 0, 0), 2.0, new Color(1.0, 1.0, 1.0));
 
         // RENDER LOOP
         for (int y = 0; y < resY; y++) {
@@ -98,11 +98,22 @@ public class Main {
         // calculate lighting if any object was hit
         if (hitObject != null) {
             Vector3 hitPoint = ray.getPoint(closest);
+
             Vector3 normal = hitObject.getNormal(hitPoint);
+            boolean inShadow = Lighting.isInShadow(hitPoint, light, scene);
+
             Vector3 lightDir = light.position.subtract(hitPoint).normalize();
             Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
 
-            return Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
+            if(!inShadow) {
+                return Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
+            } else {
+                return new Color(0, 0, 0);
+            }
+
+
+
+
         }
 
         //

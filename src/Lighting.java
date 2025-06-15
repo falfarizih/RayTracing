@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Lighting {
     public static Color cookTorrance(Vector3 normal, Vector3 viewDir, Vector3 lightDir, Color lightColor, double lightIntensity, Material material)
     {
@@ -7,6 +9,13 @@ public class Lighting {
         double NdotH = Math.max(0, normal.dot(halfVector)); // N · H → Halfway vector
         double VdotH = Math.max(0, viewDir.dot(halfVector)); // V · H → View-Halfway
         double r = material.roughness;
+
+
+
+
+
+
+
 
         // D (GGX)
         double r2 = r * r;
@@ -39,5 +48,18 @@ public class Lighting {
                 .multiply(kd.multiply(material.albedo).add(ks));        // Final color = Diffuse + Specular
     }
 
+    public static boolean isInShadow(Vector3 point, Light light, List<SceneObject> objects) {
+        Vector3 toLight = light.position.subtract(point);
+        Vector3 dir = toLight.normalize();
+        Ray shadowRay = new Ray(point.add(dir.multiply(1e-4)), dir);
+
+        for (SceneObject obj : objects) {
+            FinalRayHit hit = obj.intersect(shadowRay);
+            if (hit != null && hit.t < toLight.length()) {
+                return true; // Something is blocking the light
+            }
+        }
+        return false; // Light is visible
+    }
 
 }
