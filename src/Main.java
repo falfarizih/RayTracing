@@ -34,8 +34,9 @@ public class Main {
         );
 
         // MATERIALS
-        Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0);
-        Material mattePlastic = new Material(new Color(1, 1, 0), 0.9, 0.0);  // Yellow plastic
+        Material shinyMetal = new Material(new Color(0.9, 0.8, 0.7), 0.1, 1.0, 0.75);
+        Material mattePlasticRed = new Material(new Color(1, 0, 0), 0.9, 0.0, 0.5); //red plastic
+        Material mattePlasticYellow = new Material(new Color(1, 1, 0), 0.9, 0.0, 0);// Yellow plastic
 
         // SPHERE: Centered and scaled
         Matrix4 sphereQ = new Matrix4(
@@ -55,7 +56,7 @@ public class Main {
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        Quadric cylinder = new Quadric(cylinderQ, mattePlastic);
+        Quadric cylinder = new Quadric(cylinderQ, mattePlasticYellow);
         Matrix4 cylinderTransform = Matrix4.translation(0, 0, -4).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
         cylinder.applyTransformation(cylinderTransform);
 
@@ -72,7 +73,7 @@ public class Main {
         for (int y = 0; y < resY; y++) {
             for (int x = 0; x < resX; x++) {
                 Ray ray = camera.generateRay(x, y, resX, resY);
-                Color color = traceRay(ray, scene, light);
+                Color color = traceRay(ray, scene, light, 3);
                 Color corrected = color.applyGamma(2.2);
                 pixels[y * resX + x] = corrected.toRGB();
             }
@@ -82,7 +83,9 @@ public class Main {
         mis.newPixels();
     }
 
-    public static Color traceRay(Ray ray, List<SceneObject> scene, Light light) {
+    public static Color traceRay(Ray ray, List<SceneObject> scene, Light light, int depth) {
+        if (depth <= 0) return new Color(0, 0, 0);
+
         double closest = Double.POSITIVE_INFINITY;
         Quadric hitObject = null;
 
@@ -97,22 +100,32 @@ public class Main {
 
         // calculate lighting if any object was hit
         if (hitObject != null) {
+            Color localColor = new Color(0, 0, 0);
             Vector3 hitPoint = ray.getPoint(closest);
+            Material material = hitObject.material;
 
             Vector3 normal = hitObject.getNormal(hitPoint);
             boolean inShadow = Lighting.isInShadow(hitPoint, light, scene);
 
-            Vector3 lightDir = light.position.subtract(hitPoint).normalize();
             Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
 
+
+            // recursion
+            Vector3 reflectDir = ray.direction.subtract(normal.multiply(2 * ray.direction.dot(normal))).normalize();
+            Ray reflectRay = new Ray(hitPoint.add(reflectDir.multiply(0.001)), reflectDir);
+            Color reflectedColor = traceRay(reflectRay, scene, light, depth - 1);
+
+
+
+
             if(!inShadow) {
-                return Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
-            } else {
-                return new Color(0, 0, 0);
+                Vector3 lightDir = light.position.subtract(hitPoint).normalize();
+                localColor = Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
             }
 
-
-
+            // localColor + reflected
+            return localColor.multiply(1 - material.reflectivity)
+                    .add(reflectedColor.multiply(material.reflectivity));
 
         }
 

@@ -51,7 +51,7 @@ public class Lighting {
     public static boolean isInShadow(Vector3 point, Light light, List<SceneObject> objects) {
         Vector3 toLight = light.position.subtract(point);
         Vector3 dir = toLight.normalize();
-        Ray shadowRay = new Ray(point.add(dir.multiply(1e-4)), dir);
+        Ray shadowRay = new Ray(point.add(dir.multiply(0.001)), dir);
 
         for (SceneObject obj : objects) {
             FinalRayHit hit = obj.intersect(shadowRay);
