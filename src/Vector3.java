@@ -44,6 +44,10 @@ public class Vector3 {
         return this.multiply(1.0 / length);
     }
 
+    public Vector3 negate() {
+        return new Vector3(-this.x, -this.y, -this.z);
+    }
+
     //get length
     public double length() {
         return Math.sqrt(this.dot(this));
