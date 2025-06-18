@@ -132,13 +132,9 @@ public class Main {
 
 
             // reflection
-            Vector3 reflectDir = ray.direction.subtract(normal.multiply(2 * ray.direction.dot(normal))).normalize();
+            Vector3 reflectDir = ray.direction.subtract(normal.multiply(2 * ray.direction.dot(normal))).normalize(); //r = v - 2(n · v)n
             Ray reflectRay = new Ray(hitPoint.add(reflectDir.multiply(0.001)), reflectDir);
             Color reflectedColor = traceRay(reflectRay, scene, light, depth - 1);
-
-
-
-
 
 
             // refraction
@@ -146,14 +142,13 @@ public class Main {
             double fresnel = 1.0;
 
             if (material.transparency > 0.0) {
-                double n1 = 1.0;               // air
-                double n2 = material.ior;      // object
+                double n1 = 1.0;               // ior of air
+                double n2 = material.ior;      // ior of material
                 Vector3 n = normal;
 
                 double cosI = -n.dot(ray.direction);
                 if (cosI < 0) {
-                    // Ray is inside object, flip normal and invert IORs
-                    n = n.negate();
+                    n = n.negate();         // Ray is inside object, flip normal and invert IORs
                     double temp = n1;
                     n1 = n2;
                     n2 = temp;
@@ -165,14 +160,13 @@ public class Main {
 
                 if (sinT2 <= 1.0) {
                     double cosT = Math.sqrt(1 - sinT2);
-                    Vector3 refractDir = ray.direction.multiply(eta)
-                            .add(n.multiply(eta * cosI - cosT))
-                            .normalize();
-                    Ray refractRay = new Ray(hitPoint.add(refractDir.multiply(1e-4)), refractDir);
+
+                    Vector3 refractDir = ray.direction.multiply(eta).add(n.multiply(eta * cosI - cosT)).normalize(); //  t = ηv + (ηcosI – cosT)n
+                    Ray refractRay = new Ray(hitPoint.add(refractDir.multiply(0.001)), refractDir);
                     refractedColor = traceRay(refractRay, scene, light, depth - 1);
 
                     // --- Fresnel via Schlick approximation ---
-                    fresnel = Math.pow(1 - cosI, 5);
+                    fresnel = Math.pow(1 - cosI, 5); // F = (1-cosI)^5
                 } else {
                     // Total internal reflection
                     fresnel = 1.0;
@@ -187,15 +181,15 @@ public class Main {
 
             // localColor + reflected + refraction
             Color finalColor;
-
+            // (1 – T) * localColor + T * (F * reflected + (1 – F) * refracted)
             if (material.transparency > 0.0) {
-                // Transparent surface: mix reflection & refraction
+                // mix reflection & refraction
                 Color reflectionRefraction = reflectedColor.multiply(fresnel)
                         .add(refractedColor.multiply(1 - fresnel));
                 finalColor = localColor.multiply(1 - material.transparency)
                         .add(reflectionRefraction.multiply(material.transparency));
             } else {
-                // Opaque surface: mix local + reflection via reflectivity
+                // mix local + reflection via reflectivity
                 finalColor = localColor.multiply(1 - material.reflectivity)
                         .add(reflectedColor.multiply(material.reflectivity));
             }
