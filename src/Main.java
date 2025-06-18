@@ -81,7 +81,7 @@ public class Main {
         List<SceneObject> scene = new ArrayList<>();
 
         // ADD TO SCENE
-        //(scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
+        //scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
         scene.add(sphere);
         scene.add(sphere2);
         scene.add(cylinder);
@@ -142,33 +142,32 @@ public class Main {
             double fresnel = 1.0;
 
             if (material.transparency > 0.0) {
-                double n1 = 1.0;               // ior of air
-                double n2 = material.ior;      // ior of material
+                double i1 = 1.0;               // ior of air
+                double i2 = material.ior;      // ior of material
                 Vector3 n = normal;
 
-                double cosI = -n.dot(ray.direction);
-                if (cosI < 0) {
-                    n = n.negate();         // Ray is inside object, flip normal and invert IORs
-                    double temp = n1;
-                    n1 = n2;
-                    n2 = temp;
-                    cosI = -n.dot(ray.direction);
+                double a = -n.dot(ray.direction); // a = -v1.n = cos(w) = angle between ray and normal
+                if (a < 0) {             //if ray is inside the object
+                    n = n.negate();         // flip normal
+                    double temp = i1;
+                    i1 = i2;
+                    i2 = temp;                  // swap the air ior and material
+                    a = -n.dot(ray.direction);
                 }
 
-                double eta = n1 / n2;
-                double sinT2 = eta * eta * (1 - cosI * cosI);
+                double i = i1 / i2;           // i = i1/i2
+                double sinT2 = i * i * (1 - a * a);       // sin^2(θ_t)
 
-                if (sinT2 <= 1.0) {
-                    double cosT = Math.sqrt(1 - sinT2);
+                if (sinT2 <= 1.0) { //no internal reflection
+                    double b = Math.sqrt(1 - sinT2);     // b = sqrt(1-i^2(1-a^)) = angle adter refraction
 
-                    Vector3 refractDir = ray.direction.multiply(eta).add(n.multiply(eta * cosI - cosT)).normalize(); //  t = ηv + (ηcosI – cosT)n
+                    Vector3 refractDir = ray.direction.multiply(i).add(n.multiply(i * a - b)).normalize(); //  v2 = i*v1 + (i*a – b)n
                     Ray refractRay = new Ray(hitPoint.add(refractDir.multiply(0.001)), refractDir);
                     refractedColor = traceRay(refractRay, scene, light, depth - 1);
 
                     //Fresnel via Schlick approximation
-                    fresnel = Math.pow(1 - cosI, 5); // F = (1-cosI)^5
-                } else {
-                    // Total internal reflection
+                    fresnel = Math.pow(1 - a, 5); // F = (1-cosI)^5
+                } else {   //total internal reflection
                     fresnel = 1.0;
                 }
             }
@@ -181,17 +180,16 @@ public class Main {
 
             // localColor + reflected + refraction
             Color finalColor;
-            // (1 – T) * localColor + T * (F * reflected + (1 – F) * refracted)
             if (material.transparency > 0.0) {
-                // mix reflection & refraction
+                // mix reflection & refraction  (1 – T) * localColor + T * (F * reflectedColor + (1 – F) * refractedColor)
                 Color reflectionRefraction = reflectedColor.multiply(fresnel)
-                        .add(refractedColor.multiply(1 - fresnel));
-                finalColor = localColor.multiply(1 - material.transparency)
-                        .add(reflectionRefraction.multiply(material.transparency));
+                        .add(refractedColor.multiply(1 - fresnel)); //(F * reflected + (1 – F) * refracted)
+                finalColor = localColor.multiply(1 - material.transparency) // (1 – T) * localColor
+                        .add(reflectionRefraction.multiply(material.transparency)); //T * Rr
             } else {
-                // mix local + reflection via reflectivity
-                finalColor = localColor.multiply(1 - material.reflectivity)
-                        .add(reflectedColor.multiply(material.reflectivity));
+                // mix local + reflection via reflectivity  (1−R)⋅localColor+R⋅reflectedColor
+                finalColor = localColor.multiply(1 - material.reflectivity) //localColor * (1-R)
+                        .add(reflectedColor.multiply(material.reflectivity)); // reflected * R
             }
 
             return finalColor.clamp();
