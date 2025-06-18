@@ -36,7 +36,7 @@ public class Main {
         // MATERIALS
         Material mirror = new Material(new Color(1.0, 1.0, 1.0), 0.1, 0, 1.0, 1.0, 0.0);
         Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.5, 1.0);
-        Material frostedGlass = new Material(new Color(0.9, 0.9, 1.0), 0.5, 0.0, 0.1, 1.5, 0.8);
+        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 0.5, 0.0, 0.1, 1.5, 0.8);
         Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
 
         // SPHERE: Centered and scaled
@@ -46,7 +46,7 @@ public class Main {
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, glass);
+        Quadric sphere = new Quadric(sphereQ, translucentGlass);
         Matrix4 sphereTransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
         sphere.applyTransformation(sphereTransform);
 
