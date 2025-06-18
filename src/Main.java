@@ -165,7 +165,7 @@ public class Main {
                     Ray refractRay = new Ray(hitPoint.add(refractDir.multiply(0.001)), refractDir);
                     refractedColor = traceRay(refractRay, scene, light, depth - 1);
 
-                    // --- Fresnel via Schlick approximation ---
+                    //Fresnel via Schlick approximation
                     fresnel = Math.pow(1 - cosI, 5); // F = (1-cosI)^5
                 } else {
                     // Total internal reflection
