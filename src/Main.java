@@ -33,11 +33,6 @@ public class Main {
                 4
         );
 
-        // MATERIALS
-        Material mirror = new Material(new Color(1.0, 1.0, 1.0), 0.1, 0, 1.0, 1.0, 0.0);
-        Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.5, 1.0);
-        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.5, 0.8);
-        Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
 
         // SPHERE QUADRIC
         Matrix4 sphereQ = new Matrix4(
@@ -46,15 +41,6 @@ public class Main {
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        //SPHERE A
-        Quadric sphere_a = new Quadric(sphereQ, matteRed);
-        Matrix4 sphereATransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
-        sphere_a.applyTransformation(sphereATransform);
-
-        // SPHERE B
-        Quadric sphere_b = new Quadric(sphereQ, matteRed);
-        Matrix4 sphereBTransform = Matrix4.translation(0.5, -1, -1.5).multiply(Matrix4.scaling(0.5, 0.25, 0.5));
-        sphere_b.applyTransformation(sphereBTransform);
 
         // CYLINDER QUADRIC
         Matrix4 cylinderQ = new Matrix4(
@@ -64,14 +50,49 @@ public class Main {
                 0, 0, 0, -1
         );
 
+
+
+        // MATERIALS
+        Material mirror = new Material(new Color(1.0, 1.0, 1.0), 0.1, 0, 1.0, 1.0, 0.0);
+        Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.5, 1.0);
+        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.5, 0.8);
+        Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
+        Material matteYellow = new Material(new Color(1, 0.8, 0.1), 0.9, 0.0, 0.0, 1.0, 0.0);
+        Material matteWhite = new Material(new Color(1, 1, 1), 0.9, 0.0, 0.0, 1.0, 0.0);
+        Material matteGreen = new Material(new Color(0.5, 1, 0.5), 0.9, 0.0, 0.0, 1.0, 0.0);
+        Material matteBrown = new Material(new Color(0.5, 0.2, 0.1), 0.9, 0.0, 0.0, 1.0, 0.0);
+        Material matteDarkGreen = new Material(new Color(0.1, 0.5, 0.1), 0.9, 0.0, 0.0, 1.0, 0.0);
+
+
+
+        //SPHERE A
+        Quadric sphere_a = new Quadric(sphereQ, matteWhite);
+        Matrix4 sphereATransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
+        sphere_a.applyTransformation(sphereATransform);
+
+        // SPHERE B
+        Quadric sphere_b = new Quadric(sphereQ, matteWhite);
+        Matrix4 sphereBTransform = Matrix4.translation(0.5, -1, -1.5).multiply(Matrix4.scaling(0.5, 0.25, 0.5));
+        sphere_b.applyTransformation(sphereBTransform);
+
+        // SPHERE C
+        Quadric sphere_c = new Quadric(sphereQ, matteDarkGreen);
+        Matrix4 sphereCTransform = Matrix4.translation(-0.6, -2.5, -1.8).multiply(Matrix4.scaling(1, 1, 1));
+        sphere_c.applyTransformation(sphereCTransform);
+
+        // SPHERE D
+        Quadric sphere_d = new Quadric(sphereQ, matteDarkGreen);
+        Matrix4 sphereDTransform = Matrix4.translation(-1.5, -2, -1.7).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
+        sphere_d.applyTransformation(sphereDTransform);
+
         // CYLINDER
-        Quadric cylinder = new Quadric(cylinderQ, matteRed);
+        Quadric cylinder = new Quadric(cylinderQ, matteBrown);
         Matrix4 cylinderTransform = Matrix4.translation(-1, 0, -2).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
         cylinder.applyTransformation(cylinderTransform);
 
 
         // FLAT SPHERE
-        Quadric sphere_flat = new Quadric(sphereQ, matteRed);
+        Quadric sphere_flat = new Quadric(sphereQ, matteGreen);
         Matrix4 groundTransform = Matrix4.translation(0, 1, -4).multiply(Matrix4.scaling(5.0, 0.1, 5.0));
         sphere_flat.applyTransformation(groundTransform);
 
@@ -84,6 +105,8 @@ public class Main {
         //scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
         scene.add(sphere_a);
         scene.add(sphere_b);
+        scene.add(sphere_c);
+        scene.add(sphere_d);
         scene.add(sphere_flat);
         scene.add(cylinder);
 
@@ -213,6 +236,6 @@ public class Main {
         }
 
         //
-        return new Color(0.1, 0.1, 0.1); // background
+        return new Color(0.1, 0.5, 1); // background
     }
 }
