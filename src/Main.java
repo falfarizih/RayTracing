@@ -90,12 +90,12 @@ public class Main {
 
         // SPHERE E
         Quadric sphere_e = new Quadric(sphereQ, matteDarkGreen);
-        Matrix4 sphere_eTransform = Matrix4.translation(1.3, -2.5, -1.8).multiply(Matrix4.scaling(1, 1, 1));
+        Matrix4 sphere_eTransform = Matrix4.translation(1.3, -2.5, -2.3).multiply(Matrix4.scaling(1, 1, 1));
         sphere_e.applyTransformation(sphere_eTransform);
 
         // SPHERE F
         Quadric sphere_f = new Quadric(sphereQ, matteDarkGreen);
-        Matrix4 sphere_fTransform = Matrix4.translation(2.0, -2, -1.7).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
+        Matrix4 sphere_fTransform = Matrix4.translation(2.0, -2, -2.2).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
         sphere_f.applyTransformation(sphere_fTransform);
 
         // CYLINDER
@@ -104,7 +104,7 @@ public class Main {
         tree.applyTransformation(treeTransform);
 
         Quadric tree_2 = new Quadric(cylinderQ, matteBrown);
-        Matrix4 tree_2Transform = Matrix4.translation(2, 0, -2.5).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
+        Matrix4 tree_2Transform = Matrix4.translation(2, 0, -3).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
         tree_2.applyTransformation(tree_2Transform);
 
 
