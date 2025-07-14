@@ -77,6 +77,14 @@ public class Vector3 {
         return new Vector3(x, y, z);
     }
 
+    public static Vector3 randomPointOnDisk(double radius) {
+        double r = radius * Math.sqrt(Math.random());
+        double theta = Math.random() * 2 * Math.PI;
+        double x = r * Math.cos(theta);
+        double y = r * Math.sin(theta);
+        return new Vector3(x, y, 0);
+    }
+
     public double lengthSquared() {
         return x * x + y * y + z * z;
     }

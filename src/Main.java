@@ -33,6 +33,9 @@ public class Main {
                 4
         );
 
+        // Set Depth of Field Parameters
+        camera.apertureSize = 0.05;
+        camera.focusDistance = 2.0; // Focus plane distance
 
         // SPHERE QUADRIC
         Matrix4 sphereQ = new Matrix4(
@@ -85,10 +88,24 @@ public class Main {
         Matrix4 sphereDTransform = Matrix4.translation(-1.5, -2, -1.7).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
         sphere_d.applyTransformation(sphereDTransform);
 
+        // SPHERE E
+        Quadric sphere_e = new Quadric(sphereQ, matteDarkGreen);
+        Matrix4 sphere_eTransform = Matrix4.translation(1.3, -2.5, -1.8).multiply(Matrix4.scaling(1, 1, 1));
+        sphere_e.applyTransformation(sphere_eTransform);
+
+        // SPHERE F
+        Quadric sphere_f = new Quadric(sphereQ, matteDarkGreen);
+        Matrix4 sphere_fTransform = Matrix4.translation(2.0, -2, -1.7).multiply(Matrix4.scaling(0.5, 0.5, 0.5));
+        sphere_f.applyTransformation(sphere_fTransform);
+
         // CYLINDER
-        Quadric cylinder = new Quadric(cylinderQ, matteBrown);
-        Matrix4 cylinderTransform = Matrix4.translation(-1, 0, -2).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
-        cylinder.applyTransformation(cylinderTransform);
+        Quadric tree = new Quadric(cylinderQ, matteBrown);
+        Matrix4 treeTransform = Matrix4.translation(-1, 0, -2).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
+        tree.applyTransformation(treeTransform);
+
+        Quadric tree_2 = new Quadric(cylinderQ, matteBrown);
+        Matrix4 tree_2Transform = Matrix4.translation(2, 0, -2.5).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
+        tree_2.applyTransformation(tree_2Transform);
 
 
         // FLAT SPHERE
@@ -107,24 +124,33 @@ public class Main {
         scene.add(sphere_b);
         scene.add(sphere_c);
         scene.add(sphere_d);
+        scene.add(sphere_e);
+        scene.add(sphere_f);
         scene.add(sphere_flat);
-        scene.add(cylinder);
+        scene.add(tree);
+        scene.add(tree_2);
 
 
         // LIGHT
         Light light = new Light(new Vector3(2, 0, 0), 2.0, new Color(1.0, 1.0, 1.0));
 
         // RENDER LOOP
+        int samplesPerPixel = 8;
+
         for (int y = 0; y < resY; y++) {
             for (int x = 0; x < resX; x++) {
-                Ray ray = camera.generateRay(x, y, resX, resY);
-                Color color = traceRay(ray, scene, light, 3);
-                Color corrected = color.applyGamma(2.2);
-                pixels[y * resX + x] = corrected.toRGB();
+                Color accumulated = new Color(0, 0, 0);
+                for (int s = 0; s < samplesPerPixel; s++) {
+                    double jitterX = x + Math.random();
+                    double jitterY = y + Math.random();
+                    Ray ray = camera.generateRay(jitterX, jitterY, resX, resY);
+                    Color color = traceRay(ray, scene, light, 3);
+                    accumulated = accumulated.add(color);
+                }
+                Color averaged = accumulated.multiply(1.0 / samplesPerPixel).applyGamma(2.2);
+                pixels[y * resX + x] = averaged.toRGB();
             }
         }
-
-        // DISPLAY IMAGE
         mis.newPixels();
     }
 
