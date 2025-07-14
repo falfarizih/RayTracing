@@ -39,18 +39,24 @@ public class Main {
         Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.5, 0.8);
         Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
 
-        // SPHERE: Centered and scaled
+        // SPHERE QUADRIC
         Matrix4 sphereQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, matteRed);
-        Matrix4 sphereTransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
-        sphere.applyTransformation(sphereTransform);
+        //SPHERE A
+        Quadric sphere_a = new Quadric(sphereQ, matteRed);
+        Matrix4 sphereATransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
+        sphere_a.applyTransformation(sphereATransform);
 
-        // CYLINDER: Translated and rotated
+        // SPHERE B
+        Quadric sphere_b = new Quadric(sphereQ, matteRed);
+        Matrix4 sphereBTransform = Matrix4.translation(0.5, -1, -1.5).multiply(Matrix4.scaling(0.5, 0.25, 0.5));
+        sphere_b.applyTransformation(sphereBTransform);
+
+        // CYLINDER QUADRIC
         Matrix4 cylinderQ = new Matrix4(
                 1, 0, 0, 0,
                 0, 0, 0, 0,
@@ -58,22 +64,16 @@ public class Main {
                 0, 0, 0, -1
         );
 
-
+        // CYLINDER
         Quadric cylinder = new Quadric(cylinderQ, matteRed);
-        Matrix4 cylinderTransform = Matrix4.translation(0, 0, -5).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
+        Matrix4 cylinderTransform = Matrix4.translation(-1, 0, -2).multiply(Matrix4.scaling(0.3, 1.0, 0.3));
         cylinder.applyTransformation(cylinderTransform);
 
 
         // FLAT SPHERE
-        Matrix4 sphereQ2 = new Matrix4(
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, -1
-        );
-        Quadric sphere2 = new Quadric(sphereQ2, matteRed);
+        Quadric sphere_flat = new Quadric(sphereQ, matteRed);
         Matrix4 groundTransform = Matrix4.translation(0, 1, -4).multiply(Matrix4.scaling(5.0, 0.1, 5.0));
-        sphere2.applyTransformation(groundTransform);
+        sphere_flat.applyTransformation(groundTransform);
 
 
 
@@ -82,8 +82,9 @@ public class Main {
 
         // ADD TO SCENE
         //scene.add(new CSG(cylinder, sphere, CSG.Operation.UNION));
-        scene.add(sphere);
-        scene.add(sphere2);
+        scene.add(sphere_a);
+        scene.add(sphere_b);
+        scene.add(sphere_flat);
         scene.add(cylinder);
 
 
@@ -124,11 +125,17 @@ public class Main {
             Color localColor = new Color(0, 0, 0);
             Vector3 hitPoint = ray.getPoint(closest);
             Material material = hitObject.material;
-
-            Vector3 normal = hitObject.getNormal(hitPoint);
-            double visibility = Lighting.softShadowVisibility(hitPoint, light, scene, 16);
-
             Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
+            Vector3 normal = hitObject.getNormal(hitPoint);
+
+            // Soft Shadow Sampling
+            List<Vector3> shadowSamples = Lighting.generateLightSamples(hitPoint, light, 16, 0.1);
+            double visibility = Lighting.sampleOcclusion(hitPoint, shadowSamples, scene, 100.0);
+
+            // Ambient Occlusion
+            List<Vector3> aoSamples = Lighting.generateHemisphereSamples(normal, 16);
+            double ao = Lighting.sampleOcclusion(hitPoint, aoSamples, scene, 1.0);
+
 
 
             // reflection
@@ -174,7 +181,7 @@ public class Main {
 
             // diffuse lighting
             if (material.transparency >= 1.0) {
-                localColor = new Color(0, 0, 0); // Transparent materials don't contribute diffuse shading
+                localColor = new Color(0, 0, 0);
             } else {
                 Vector3 lightDir = light.position.subtract(hitPoint).normalize();
                 Color contribution = Lighting.cookTorrance(
@@ -182,10 +189,10 @@ public class Main {
                         viewDir,
                         lightDir,
                         light.color,
-                        light.intensity * visibility, // Scale intensity by soft shadow visibility
+                        light.intensity * visibility,
                         material
                 );
-                localColor = localColor.add(contribution);
+                localColor = localColor.add(contribution.multiply(ao));
             }
 
             // localColor + reflected + refraction

@@ -53,6 +53,21 @@ public class Vector3 {
         return Math.sqrt(this.dot(this));
     }
 
+    public static Vector3 randomHemisphereDirection(Vector3 normal) {
+        Vector3 randomDir;
+        do {
+            double x = Math.random() * 2 - 1;
+            double y = Math.random() * 2 - 1;
+            double z = Math.random() * 2 - 1;
+            randomDir = new Vector3(x, y, z);
+        } while (randomDir.lengthSquared() > 1);
+
+        if (randomDir.dot(normal) < 0) {
+            randomDir = randomDir.negate();
+        }
+        return randomDir.normalize();
+    }
+
     public static Vector3 randomUnitVector() {
         double theta = Math.random() * 2 * Math.PI;
         double phi = Math.acos(2 * Math.random() - 1);
@@ -62,4 +77,7 @@ public class Vector3 {
         return new Vector3(x, y, z);
     }
 
+    public double lengthSquared() {
+        return x * x + y * y + z * z;
+    }
 }

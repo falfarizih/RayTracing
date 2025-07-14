@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Lighting {
@@ -65,34 +66,43 @@ public class Lighting {
         return false; // Light is visible
     }
 
-    public static double softShadowVisibility(Vector3 point, Light light, List<SceneObject> objects, int samples) {
+    public static double sampleOcclusion(Vector3 origin, List<Vector3> sampleDirections, List<SceneObject> objects, double maxDistance) {
         int unblocked = 0;
-
-        for (int i = 0; i < samples; i++) {
-            // Random point on a sphere around the light
-            Vector3 randomDir = Vector3.randomUnitVector();
-            Vector3 lightSample = light.position.add(randomDir.multiply(0.1)); // 0.1 is the area size (tweakable)
-            Vector3 toLight = lightSample.subtract(point);
-            Vector3 dir = toLight.normalize();
-            double distToLight = toLight.length();
-
-            Ray shadowRay = new Ray(point.add(dir.multiply(0.001)), dir);
-
+        for (Vector3 dir : sampleDirections) {
+            Ray sampleRay = new Ray(origin.add(dir.multiply(0.001)), dir);
             boolean blocked = false;
             for (SceneObject obj : objects) {
-                FinalRayHit hit = obj.intersect(shadowRay);
-                if (hit != null && hit.t < distToLight && hit.hitObject.material.transparency < 1.0) {
+                FinalRayHit hit = obj.intersect(sampleRay);
+                if (hit != null && hit.t > 0 && hit.t < maxDistance && hit.hitObject.material.transparency < 1.0) {
                     blocked = true;
                     break;
                 }
             }
-
             if (!blocked) {
                 unblocked++;
             }
         }
+        return (double) unblocked / sampleDirections.size();
+    }
 
-        return (double) unblocked / samples;
+    public static List<Vector3> generateHemisphereSamples(Vector3 normal, int samples) {
+        List<Vector3> directions = new ArrayList<>();
+        for (int i = 0; i < samples; i++) {
+            Vector3 randomDir = Vector3.randomHemisphereDirection(normal);
+            directions.add(randomDir);
+        }
+        return directions;
+    }
+
+    public static List<Vector3> generateLightSamples(Vector3 point, Light light, int samples, double lightSize) {
+        List<Vector3> directions = new ArrayList<>();
+        for (int i = 0; i < samples; i++) {
+            Vector3 randomOffset = Vector3.randomUnitVector().multiply(lightSize);
+            Vector3 lightSample = light.position.add(randomOffset);
+            Vector3 dir = lightSample.subtract(point).normalize();
+            directions.add(dir);
+        }
+        return directions;
     }
 
 }
