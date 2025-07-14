@@ -56,10 +56,15 @@ public class Lighting {
         for (SceneObject obj : objects) {
             FinalRayHit hit = obj.intersect(shadowRay);
             if (hit != null && hit.t < toLight.length()) {
-                return true; // Something is blocking the light
+                if (hit.hitObject.material.transparency > 0) {
+                    continue; // Fully transparent objects don't block light
+                }
+                return true;
             }
         }
         return false; // Light is visible
     }
+
+
 
 }

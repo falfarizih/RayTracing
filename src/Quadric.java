@@ -98,4 +98,8 @@ public class Quadric implements SceneObject{
 
         return normal.normalize();
     }
+
+    public Material getMaterial() {
+        return material;
+    }
 }

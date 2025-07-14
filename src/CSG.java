@@ -29,4 +29,8 @@ public class CSG implements SceneObject {
         }
         return null;
     }
+
+    public Material getMaterial() {
+        return null;
+    }
 }

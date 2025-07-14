@@ -36,7 +36,7 @@ public class Main {
         // MATERIALS
         Material mirror = new Material(new Color(1.0, 1.0, 1.0), 0.1, 0, 1.0, 1.0, 0.0);
         Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.5, 1.0);
-        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 0.5, 0.0, 0.1, 1.5, 0.8);
+        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.5, 0.8);
         Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
 
         // SPHERE: Centered and scaled
@@ -46,7 +46,7 @@ public class Main {
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, translucentGlass);
+        Quadric sphere = new Quadric(sphereQ, glass);
         Matrix4 sphereTransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
         sphere.applyTransformation(sphereTransform);
 
@@ -127,6 +127,7 @@ public class Main {
 
             Vector3 normal = hitObject.getNormal(hitPoint);
             boolean inShadow = Lighting.isInShadow(hitPoint, light, scene);
+            boolean skipShading = (material.transparency >= 1);
 
             Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
 
@@ -173,9 +174,13 @@ public class Main {
             }
 
             // diffuse lighting
-            if(!inShadow) {
-                Vector3 lightDir = light.position.subtract(hitPoint).normalize();
-                localColor = Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
+            if(!inShadow || skipShading) {
+                if (material.transparency >= 1) {
+                localColor = new Color(0, 0, 0); // Skip local shading for  glass (transparency 1)
+                } else {
+                    Vector3 lightDir = light.position.subtract(hitPoint).normalize();
+                    localColor = Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
+                }
             }
 
             // localColor + reflected + refraction

@@ -52,4 +52,5 @@ public class Vector3 {
     public double length() {
         return Math.sqrt(this.dot(this));
     }
+    
 }
