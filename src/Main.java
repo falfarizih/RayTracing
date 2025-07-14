@@ -46,7 +46,7 @@ public class Main {
                 0, 0, 1, 0,
                 0, 0, 0, -1
         );
-        Quadric sphere = new Quadric(sphereQ, glass);
+        Quadric sphere = new Quadric(sphereQ, matteRed);
         Matrix4 sphereTransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
         sphere.applyTransformation(sphereTransform);
 
@@ -126,8 +126,7 @@ public class Main {
             Material material = hitObject.material;
 
             Vector3 normal = hitObject.getNormal(hitPoint);
-            boolean inShadow = Lighting.isInShadow(hitPoint, light, scene);
-            boolean skipShading = (material.transparency >= 1);
+            double visibility = Lighting.softShadowVisibility(hitPoint, light, scene, 16);
 
             Vector3 viewDir = ray.origin.subtract(hitPoint).normalize();
 
@@ -174,13 +173,19 @@ public class Main {
             }
 
             // diffuse lighting
-            if(!inShadow || skipShading) {
-                if (material.transparency >= 1) {
-                localColor = new Color(0, 0, 0); // Skip local shading for  glass (transparency 1)
-                } else {
-                    Vector3 lightDir = light.position.subtract(hitPoint).normalize();
-                    localColor = Lighting.cookTorrance(normal, viewDir, lightDir, light.color, light.intensity, hitObject.material);
-                }
+            if (material.transparency >= 1.0) {
+                localColor = new Color(0, 0, 0); // Transparent materials don't contribute diffuse shading
+            } else {
+                Vector3 lightDir = light.position.subtract(hitPoint).normalize();
+                Color contribution = Lighting.cookTorrance(
+                        normal,
+                        viewDir,
+                        lightDir,
+                        light.color,
+                        light.intensity * visibility, // Scale intensity by soft shadow visibility
+                        material
+                );
+                localColor = localColor.add(contribution);
             }
 
             // localColor + reflected + refraction

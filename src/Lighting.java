@@ -65,6 +65,34 @@ public class Lighting {
         return false; // Light is visible
     }
 
+    public static double softShadowVisibility(Vector3 point, Light light, List<SceneObject> objects, int samples) {
+        int unblocked = 0;
 
+        for (int i = 0; i < samples; i++) {
+            // Random point on a sphere around the light
+            Vector3 randomDir = Vector3.randomUnitVector();
+            Vector3 lightSample = light.position.add(randomDir.multiply(0.1)); // 0.1 is the area size (tweakable)
+            Vector3 toLight = lightSample.subtract(point);
+            Vector3 dir = toLight.normalize();
+            double distToLight = toLight.length();
+
+            Ray shadowRay = new Ray(point.add(dir.multiply(0.001)), dir);
+
+            boolean blocked = false;
+            for (SceneObject obj : objects) {
+                FinalRayHit hit = obj.intersect(shadowRay);
+                if (hit != null && hit.t < distToLight && hit.hitObject.material.transparency < 1.0) {
+                    blocked = true;
+                    break;
+                }
+            }
+
+            if (!blocked) {
+                unblocked++;
+            }
+        }
+
+        return (double) unblocked / samples;
+    }
 
 }

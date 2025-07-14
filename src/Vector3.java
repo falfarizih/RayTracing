@@ -53,4 +53,13 @@ public class Vector3 {
         return Math.sqrt(this.dot(this));
     }
 
+    public static Vector3 randomUnitVector() {
+        double theta = Math.random() * 2 * Math.PI;
+        double phi = Math.acos(2 * Math.random() - 1);
+        double x = Math.sin(phi) * Math.cos(theta);
+        double y = Math.sin(phi) * Math.sin(theta);
+        double z = Math.cos(phi);
+        return new Vector3(x, y, z);
+    }
+
 }
