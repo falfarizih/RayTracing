@@ -3,7 +3,7 @@ public class Camera {
     public Vector3 forward, right, up;
     public double image_plane_width, image_plane_height;
 
-    // Depth of Field parameters
+    // Depth of Field parameters    
     public double apertureSize = 0.05;
     public double focusDistance = 5.0;
 

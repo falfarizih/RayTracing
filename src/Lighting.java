@@ -66,6 +66,7 @@ public class Lighting {
         return false; // Light is visible
     }
 
+    //checks how many sample ray actually hit the light sample, then averages it with the number of samples
     public static double sampleOcclusion(Vector3 origin, List<Vector3> sampleDirections, List<SceneObject> objects, double maxDistance) {
         int unblocked = 0;
         for (Vector3 dir : sampleDirections) {
@@ -73,7 +74,7 @@ public class Lighting {
             boolean blocked = false;
             for (SceneObject obj : objects) {
                 FinalRayHit hit = obj.intersect(sampleRay);
-                if (hit != null && hit.t > 0 && hit.t < maxDistance && hit.hitObject.material.transparency < 1.0) {
+                if (hit != null && hit.t > 0 && hit.t < maxDistance && hit.hitObject.material.transparency == 0) {   //checks if there is a hit, check if the hit is not behind, check if the object is between the surface and the light, check if object is not fully transparent
                     blocked = true;
                     break;
                 }
@@ -97,9 +98,9 @@ public class Lighting {
     public static List<Vector3> generateLightSamples(Vector3 point, Light light, int samples, double lightSize) {
         List<Vector3> directions = new ArrayList<>();
         for (int i = 0; i < samples; i++) {
-            Vector3 randomOffset = Vector3.randomUnitVector().multiply(lightSize);
-            Vector3 lightSample = light.position.add(randomOffset);
-            Vector3 dir = lightSample.subtract(point).normalize();
+            Vector3 randomOffset = Vector3.randomUnitVector().multiply(lightSize); //create random position for the additional light
+            Vector3 lightSample = light.position.add(randomOffset); //create light sample with the new offset
+            Vector3 dir = lightSample.subtract(point).normalize(); // the direction
             directions.add(dir);
         }
         return directions;

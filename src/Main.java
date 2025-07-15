@@ -57,8 +57,8 @@ public class Main {
 
         // MATERIALS
         Material mirror = new Material(new Color(1.0, 1.0, 1.0), 0.1, 0, 1.0, 1.0, 0.0);
-        Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.5, 1.0);
-        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.5, 0.8);
+        Material glass = new Material(new Color(1.0, 1.0, 1.0), 0.0, 0.0, 0.0, 1.8, 1.0);
+        Material translucentGlass = new Material(new Color(0.9, 0.9, 1.0), 1, 0.0, 0.0, 1.8, 0.8);
         Material matteRed = new Material(new Color(1.0, 0.2, 0.2), 0.9, 0.0, 0.0, 1.0, 0.0);
         Material matteYellow = new Material(new Color(1, 0.8, 0.1), 0.9, 0.0, 0.0, 1.0, 0.0);
         Material matteWhite = new Material(new Color(1, 1, 1), 0.9, 0.0, 0.0, 1.0, 0.0);
@@ -69,7 +69,7 @@ public class Main {
 
 
         //SPHERE A
-        Quadric sphere_a = new Quadric(sphereQ, matteWhite);
+        Quadric sphere_a = new Quadric(sphereQ, translucentGlass);
         Matrix4 sphereATransform = Matrix4.translation(0.5, 0.2, -2).multiply(Matrix4.scaling(1, 1, 1));
         sphere_a.applyTransformation(sphereATransform);
 
@@ -178,8 +178,8 @@ public class Main {
             Vector3 normal = hitObject.getNormal(hitPoint);
 
             // Soft Shadow Sampling
-            List<Vector3> shadowSamples = Lighting.generateLightSamples(hitPoint, light, 16, 0.1);
-            double visibility = Lighting.sampleOcclusion(hitPoint, shadowSamples, scene, 100.0);
+            List<Vector3> shadowSamples = Lighting.generateLightSamples(hitPoint, light, 16, 0.1);  // generate the samples from the object ot the light source
+            double visibility = Lighting.sampleOcclusion(hitPoint, shadowSamples, scene, 100.0);        // returns 0 - 1.0, as to how soft the shadow is at that spot
 
             // Ambient Occlusion
             List<Vector3> aoSamples = Lighting.generateHemisphereSamples(normal, 16);
@@ -238,10 +238,10 @@ public class Main {
                         viewDir,
                         lightDir,
                         light.color,
-                        light.intensity * visibility,
+                        light.intensity * visibility, //soft shadows here
                         material
                 );
-                localColor = localColor.add(contribution.multiply(ao));
+                localColor = localColor.add(contribution.multiply(ao)); //ao here
             }
 
             // localColor + reflected + refraction
