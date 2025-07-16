@@ -141,9 +141,9 @@ public class Main {
             for (int x = 0; x < resX; x++) {
                 Color accumulated = new Color(0, 0, 0);
                 for (int s = 0; s < samplesPerPixel; s++) {
-                    double jitterX = x + Math.random();
-                    double jitterY = y + Math.random();
-                    Ray ray = camera.generateRay(jitterX, jitterY, resX, resY);
+                    double offsetX = x + Math.random();
+                    double offsetY = y + Math.random();
+                    Ray ray = camera.generateRay(offsetX, offsetY, resX, resY);
                     Color color = traceRay(ray, scene, light, 3);
                     accumulated = accumulated.add(color);
                 }
